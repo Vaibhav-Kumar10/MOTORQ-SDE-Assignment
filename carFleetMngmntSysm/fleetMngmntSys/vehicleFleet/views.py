@@ -49,9 +49,50 @@ def list_vehicles(request):
         return JsonResponse({"error": str(e)}, status=404)
 
 
+# Endpoint to query any vehicle based on the various attributes provided in the get method.
 def query_vehicle(request):
-    
-    pass
+    try:
+        # Store all the query parameters passed, if any
+        query_filters = {}
+
+        # Get query parameters from URL
+        vin = request.GET.get("vin")
+        vManufacturer = request.GET.get("vManufacturer")
+        vModel = request.GET.get("vModel")
+        fleetID = request.GET.get("fleetID")
+        regStatus = request.GET.get("regStatus")
+
+        if vin:
+            query_filters["vin"] = vin
+        if vManufacturer:
+            query_filters["vManufacturer__icontains"] = vManufacturer
+        if vModel:
+            query_filters["vModel__icontains"] = vModel
+        if fleetID:
+            query_filters["fleetID__icontains"] = fleetID
+        if regStatus:
+            query_filters["regStatus__iexact"] = regStatus
+
+        # Query vehicles with the matching query parameters
+        vehicles = Vehicle.objects.filter(**query_filters).values()
+
+        if not vehicles:
+            return JsonResponse(
+                {
+                    "message": "No vehicles found that match with the passed query parameters. Try something else."
+                },
+                status=404,
+            )
+
+        return JsonResponse(
+            {
+                "message": "Found vehicles with matching query parameters",
+                "vehicles": list(vehicles),
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 # Endpoint to delete a specific vehicle record
