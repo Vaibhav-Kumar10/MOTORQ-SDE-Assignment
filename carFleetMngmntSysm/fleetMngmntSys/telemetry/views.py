@@ -72,6 +72,7 @@ def receive_telemetry_data(request):
         {"error": "INVALID REQUEST : only POST request accepted"}, status=405
     )
 
+
 # Endpoint to show complete elemetry history
 def telemetry_history(request):
     try:
@@ -79,21 +80,22 @@ def telemetry_history(request):
 
         result = [
             {
-                "timestamp": t.timestamp,
-                "latitude": t.latitude,
-                "longitude": t.longitude,
-                "speed": t.speed,
-                "fuel_level": t.fuel_level,
-                "odometer": t.odometer,
-                "engine_status": t.engine_status,
-                "diagnostic_codes": t.diagnostic_codes,
+                "timestamp": record.timestamp,
+                "latitude": record.latitude,
+                "longitude": record.longitude,
+                "speed": record.speed,
+                "fuel_level": record.fuel_level,
+                "odometer": record.odometer,
+                "engine_status": record.engine_status,
+                "diagnostic_codes": record.diagnostic_codes,
             }
-            for t in records
+            for record in records
         ]
 
         return JsonResponse({"message": "Telemetry records found", "records": result})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=404)
+
 
 # Endpoint to show latest telemetry history for a specific vehicle
 def latest_telemetry(request, id):
@@ -104,7 +106,9 @@ def latest_telemetry(request, id):
         )
 
         if not record:
-            return JsonResponse({"message": "No telemetry data found for this vehicle"}, status=404)
+            return JsonResponse(
+                {"message": "No telemetry data found for this vehicle"}, status=404
+            )
 
         data = {
             "timestamp": record.timestamp,
@@ -117,7 +121,9 @@ def latest_telemetry(request, id):
             "diagnostic_codes": record.diagnostic_codes,
         }
 
-        return JsonResponse({"message": "Latest telemetry data for thiss vehicle", "record": data})
+        return JsonResponse(
+            {"message": "Latest telemetry data for thiss vehicle", "record": data}
+        )
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=404)
