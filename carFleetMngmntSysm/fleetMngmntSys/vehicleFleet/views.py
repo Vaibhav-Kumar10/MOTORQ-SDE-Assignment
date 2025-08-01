@@ -35,7 +35,19 @@ def create_vehicle(request):
 def list_vehicle(request, id):
     try:
         vehicle = get_object_or_404(Vehicle, vin=id)
-        return JsonResponse({"message": f"Vehicle found", "vehicle": vehicle})
+        return JsonResponse(
+            {
+                "message": "Vehicle found",
+                "vehicle": {
+                    "vin": vehicle.vin,
+                    "vManufacturer": vehicle.vManufacturer,
+                    "vModel": vehicle.vModel,
+                    "fleetID": vehicle.fleetID,
+                    "ownerInfo": vehicle.ownerInfo,
+                    "regStatus": vehicle.regStatus,
+                },
+            }
+        )
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=404)
 
