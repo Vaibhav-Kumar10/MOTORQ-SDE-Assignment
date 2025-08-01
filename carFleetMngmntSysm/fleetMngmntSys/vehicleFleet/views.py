@@ -7,12 +7,11 @@ import json
 from .models import Vehicle
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
-import ratelimit.decorators.ratelimit
-
+# from ratelimit.decorators import ratelimit
 
 # Endpoint to create a vehicle record
 @csrf_exempt
-@ratelimit(key="ip", rate="3/m", block=True)
+# @ratelimit(key="ip", rate="3/m", block=True)
 def create_vehicle(request):
     if request.method == "POST":
         try:
@@ -56,7 +55,7 @@ def create_vehicle(request):
 
 
 # Endpoint to list a specific vehicle record
-@ratelimit(key="ip", rate="10/m", block=True)
+# @ratelimit(key="ip", rate="10/m", block=True)
 def list_vehicle(request, id):
     try:
         vehicle = get_object_or_404(Vehicle, vin=id)
@@ -78,7 +77,7 @@ def list_vehicle(request, id):
 
 
 # Endpoint to list all vehicles record
-@ratelimit(key="ip", rate="20/m", block=True)
+# @ratelimit(key="ip", rate="20/m", block=True)
 def list_vehicles(request):
     cached = cache.get("all_vehicles")
     if cached:
@@ -89,7 +88,7 @@ def list_vehicles(request):
 
 
 # Endpoint to query any vehicle based on the various attributes provided in the get method.
-@ratelimit(key="ip", rate="15/m", block=True)
+# @ratelimit(key="ip", rate="15/m", block=True)
 def query_vehicle(request):
     try:
         # Store all the query parameters passed, if any
@@ -140,7 +139,7 @@ def query_vehicle(request):
 
 # Endpoint to delete a specific vehicle record
 @csrf_exempt
-@ratelimit(key="ip", rate="5/m", block=True)
+# @ratelimit(key="ip", rate="5/m", block=True)
 def delete_vehicle(request, id):
     if request.method != "DELETE":
         return JsonResponse({"error": "Only DELETE method allowed"}, status=405)

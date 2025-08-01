@@ -11,7 +11,6 @@ from .tasks import process_alerts
 from django.core.cache import cache
 # from ratelimit.decorators import ratelimit
 
-
 @csrf_exempt
 # @ratelimit(key="ip", rate="10/m", block=True)  # Max 10 requests/min per IP
 def receive_telemetry_data(request):
@@ -60,7 +59,7 @@ def receive_telemetry_data(request):
         alerts_summary = cache.get("alerts_summary")
         if not alerts_summary:
             alerts_summary = list(
-                Alert.objects.values("alert_type").annotate(count=count("id"))
+                Alert.objects.values("alert_type").annotate(count=Count("id"))
             )
             cache.set("alerts_summary", alerts_summary, timeout=300)
 

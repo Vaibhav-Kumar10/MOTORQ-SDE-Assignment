@@ -1,22 +1,31 @@
+# Use official Python image
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
+# Set work directory
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    netcat \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy project
-COPY . .
+# Install pip requirements
+COPY requirements.txt /app/
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Collect static (optional if using admin)
-RUN python manage.py collectstatic --noinput
+# Copy project files
+COPY . /app/
 
-# Expose port
-EXPOSE 8000
+# Collect static files (optional for API only apps)
+# RUN python manage.py collectstatic --noinput
 
-# Start server
-CMD ["gunicorn", "fleet_system.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Run Django development server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
