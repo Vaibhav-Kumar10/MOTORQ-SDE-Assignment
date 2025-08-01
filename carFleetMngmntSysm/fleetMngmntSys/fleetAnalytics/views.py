@@ -5,8 +5,16 @@ from django.db.models import Avg, Sum, Count
 from vehicleFleet.models import Vehicle
 from telemetry.models import Telemetry, Alert
 
+from django.core.cache import cache
+from ratelimit.decorators import ratelimit
 
+
+@ratelimit(key="ip", rate="5/m", block=True)
 def analytics(request):
+    cached_data = cache.get("fleet_analytics")
+    if cached_data:
+        return JsonResponse(cached_data)
+
     try:
         # The 24 hr
         time24hr = now() - timedelta(hours=24)
@@ -39,15 +47,15 @@ def analytics(request):
             Alert.objects.values("alert_type").annotate(count=Count("id"))
         )
 
-        return JsonResponse(
-            {
-                "active_vehicles": active_cnt,
-                "inactive_vehicles": inactive_cnt,
-                "average_fuel": avg_fuel,
-                "distance_traveled_in_last_24h": distance,
-                "alerts": alerts_summary,
-            }
-        )
+        result = {
+            "active_vehicles": active_cnt,
+            "inactive_vehicles": inactive_cnt,
+            "average_fuel": avg_fuel,
+            "distance_traveled_in_last_24h": distance,
+            "alerts": alerts_summary,
+        }
+        cache.set("fleet_analytics", result, timeout=300)  # cache for 5 minutes
+        return JsonResponse(result)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

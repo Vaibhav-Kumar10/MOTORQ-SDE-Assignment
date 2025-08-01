@@ -1,21 +1,22 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Set working directory
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Copy app code
-COPY . /app
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Upgrade pip and install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy project
+COPY . .
+
+# Collect static (optional if using admin)
+RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000
 
-# Set env vars
-ENV DJANGO_SETTINGS_MODULE=oj.settings
-ENV PYTHONUNBUFFERED=1
-
-# Run migrations and start Gunicorn
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver"]
+# Start server
+CMD ["gunicorn", "fleet_system.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -6,10 +6,13 @@ from django.http import JsonResponse
 import json
 from .models import Vehicle
 from django.views.decorators.csrf import csrf_exempt
+from ratelimit.decorators import ratelimit
+from django.core.cache import cache
 
 
 # Endpoint to create a vehicle record
 @csrf_exempt
+@ratelimit(key="ip", rate="3/m", block=True)
 def create_vehicle(request):
     if request.method == "POST":
         try:
@@ -53,6 +56,7 @@ def create_vehicle(request):
 
 
 # Endpoint to list a specific vehicle record
+@ratelimit(key="ip", rate="10/m", block=True)
 def list_vehicle(request, id):
     try:
         vehicle = get_object_or_404(Vehicle, vin=id)
@@ -73,16 +77,20 @@ def list_vehicle(request, id):
         return JsonResponse({"error": str(e)}, status=404)
 
 
+
 # Endpoint to list all vehicles record
+@ratelimit(key="ip", rate="20/m", block=True)
 def list_vehicles(request):
-    try:
-        vehicles = list(Vehicle.objects.values())
-        return JsonResponse({"message": f"Vehicles found", "vehicles": vehicles})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=404)
+    cached = cache.get("all_vehicles")
+    if cached:
+        return JsonResponse({"message": "Cached", "vehicles": cached})
+    vehicles = list(Vehicle.objects.values())
+    cache.set("all_vehicles", vehicles, timeout=300)
+    return JsonResponse({"message": "Live", "vehicles": vehicles})
 
 
 # Endpoint to query any vehicle based on the various attributes provided in the get method.
+@ratelimit(key="ip", rate="15/m", block=True)
 def query_vehicle(request):
     try:
         # Store all the query parameters passed, if any
@@ -109,6 +117,9 @@ def query_vehicle(request):
         # Query vehicles with the matching query parameters
         vehicles = Vehicle.objects.filter(**query_filters).values()
 
+        if not query_filters:
+            return JsonResponse({"error": "No query parameters provided"}, status=400)
+
         if not vehicles:
             return JsonResponse(
                 {
@@ -129,7 +140,12 @@ def query_vehicle(request):
 
 
 # Endpoint to delete a specific vehicle record
+@csrf_exempt
+@ratelimit(key="ip", rate="5/m", block=True)
 def delete_vehicle(request, id):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Only DELETE method allowed"}, status=405)
+
     try:
         vehicleRecord = Vehicle.objects.get(vin=id)
         vehicleRecord.delete()
