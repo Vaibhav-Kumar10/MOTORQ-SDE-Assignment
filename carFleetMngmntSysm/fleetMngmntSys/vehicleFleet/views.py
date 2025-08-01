@@ -1,19 +1,39 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
+# from django import forms
+
+import json
 from .models import Vehicle
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Endpoint to create a vehicle record
+@csrf_exempt
 def create_vehicle(request):
     if request.method == "POST":
         try:
-            vin = request.POST.get("vin")
-            vManufacturer = request.POST.get("vManufacturer")
-            vModel = request.POST.get("vModel")
-            fleetID = request.POST.get("fleetID")
-            ownerInfo = request.POST.get("ownerInfo")
-            regStatus = request.POST.get("regStatus")
+            data = json.loads(request.body)
+
+            vin = data.get("vin")
+            vManufacturer = data.get("vManufacturer")
+            vModel = data.get("vModel")
+            fleetID = data.get("fleetID")
+            ownerInfo = data.get("ownerInfo")
+            regStatus = data.get("regStatus")
+
+            if not vin:
+                raise ValueError("VIN is required")
+            if not vManufacturer:
+                raise ValueError("vManufacturer is required")
+            if not vModel:
+                raise ValueError("vModel is required")
+            if not fleetID:
+                raise ValueError("fleetID is required")
+            if not ownerInfo:
+                raise ValueError("ownerInfo is required")
+            if not regStatus:
+                raise ValueError("regStatus is required")
 
             Vehicle.objects.create(
                 vin=vin,
@@ -23,12 +43,13 @@ def create_vehicle(request):
                 ownerInfo=ownerInfo,
                 regStatus=regStatus,
             )
+
             return JsonResponse({"message": "Vehicle created successfully"})
+        except ValueError as ve:
+            return JsonResponse({"error": str(ve)}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-    return JsonResponse(
-        {"error": "INVALID REQUEST : only POST request accepted"}, status=405
-    )
+    return JsonResponse({"error": "Only POST method allowed"}, status=405)
 
 
 # Endpoint to list a specific vehicle record

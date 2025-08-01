@@ -8,6 +8,7 @@ class Vehicle(models.Model):
     fleetID = models.CharField(max_length=50, null=False)
     ownerInfo = models.TextField(max_length=200, null=False)
     regStatus = models.CharField(max_length=10, null=False)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.vin} - {self.vManufacturer} - {self.vModel}"
