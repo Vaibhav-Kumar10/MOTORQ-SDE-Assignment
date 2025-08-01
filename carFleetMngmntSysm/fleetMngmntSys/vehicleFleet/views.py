@@ -6,8 +6,8 @@ from django.http import JsonResponse
 import json
 from .models import Vehicle
 from django.views.decorators.csrf import csrf_exempt
-from ratelimit.decorators import ratelimit
 from django.core.cache import cache
+import ratelimit.decorators.ratelimit
 
 
 # Endpoint to create a vehicle record
@@ -75,7 +75,6 @@ def list_vehicle(request, id):
         )
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=404)
-
 
 
 # Endpoint to list all vehicles record

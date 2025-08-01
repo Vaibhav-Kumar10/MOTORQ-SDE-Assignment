@@ -6,10 +6,9 @@ from vehicleFleet.models import Vehicle
 from telemetry.models import Telemetry, Alert
 
 from django.core.cache import cache
-from ratelimit.decorators import ratelimit
+# from ratelimit.decorators import ratelimit
 
-
-@ratelimit(key="ip", rate="5/m", block=True)
+# @ratelimit(key="ip", rate="5/m", block=True)
 def analytics(request):
     cached_data = cache.get("fleet_analytics")
     if cached_data:
