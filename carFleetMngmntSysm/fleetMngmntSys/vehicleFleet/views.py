@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from .models import Vehicle
 
 
+# Endpoint to create a vehicle record
 def create_vehicle(request):
     if request.method == "POST":
         try:
@@ -30,6 +31,7 @@ def create_vehicle(request):
     )
 
 
+# Endpoint to list a specific vehicle record
 def list_vehicle(request, id):
     try:
         vehicle = get_object_or_404(Vehicle, vin=id)
@@ -38,6 +40,7 @@ def list_vehicle(request, id):
         return JsonResponse({"error": str(e)}, status=404)
 
 
+# Endpoint to list all vehicles record
 def list_vehicles(request):
     try:
         vehicles = list(Vehicle.objects.values())
@@ -51,6 +54,7 @@ def query_vehicle(request):
     pass
 
 
+# Endpoint to delete a specific vehicle record
 def delete_vehicle(request, id):
     try:
         vehicleRecord = Vehicle.objects.get(vin=id)
