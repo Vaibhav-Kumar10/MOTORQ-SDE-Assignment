@@ -50,18 +50,18 @@ def receive_telemetry_data(request):
                     alert_type="Speed",
                     message=f"Speed exceeded repeatedly : {speed} kmph",
                 )
-                alert.append[
+                alert.append(
                     f"Speed limit exceeded repeatedly : {speed} kmph!! \nVehicle crossed 100 kmph {speed_violation_cnt} times! \nKeep your speed below 100 kmph."
-                ]
+                )
             if fuel_level < 15:
                 Alert.objects.create(
                     vehicle=vehicle,
                     alert_type="LowFuel",
                     message=f"Low fuel/battery : {fuel_level} %",
                 )
-                alert.append[
+                alert.append(
                     f"Low fuel/battery : {fuel_level} % !! Please charge immediately"
-                ]
+                )
 
             return JsonResponse({"message": "Telemetry data saved", "alert": alert})
 
