@@ -75,11 +75,11 @@ def receive_telemetry_data(request):
 # Endpoint to show complete elemetry history
 def telemetry_history(request):
     try:
-        cached_data = cache.get("telemetry_history")
-        if cached_data:
-            return JsonResponse(
-                {"message": "Cached telemetry records", "records": cached_data}
-            )
+        # cached_data = cache.get("telemetry_history")
+        # if cached_data:
+        #     return JsonResponse(
+        #         {"message": "Cached telemetry records", "records": cached_data}
+        #     )
 
         records = Telemetry.objects.only(
             "timestamp",
@@ -106,7 +106,7 @@ def telemetry_history(request):
             for r in records
         ]
 
-        cache.set("telemetry_history", result, timeout=300)  # cache for 5 min
+        # cache.set("telemetry_history", result, timeout=300)  # cache for 5 min
         return JsonResponse({"message": "Telemetry records found", "records": result})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=404)
@@ -115,12 +115,12 @@ def telemetry_history(request):
 # Endpoint to show latest telemetry history for a specific vehicle
 def latest_telemetry(request, id):
     try:
-        cache_key = f"latest_telemetry_{id}"
-        cached_record = cache.get(cache_key)
-        if cached_record:
-            return JsonResponse(
-                {"message": "Cached latest telemetry", "record": cached_record}
-            )
+        # cache_key = f"latest_telemetry_{id}"
+        # cached_record = cache.get(cache_key)
+        # if cached_record:
+        #     return JsonResponse(
+        #         {"message": "Cached latest telemetry", "record": cached_record}
+        #     )
 
         vehicle = get_object_or_404(Vehicle, vin=id)
         record = (
@@ -155,7 +155,7 @@ def latest_telemetry(request, id):
             "diagnostics_codes": record.diagnostics_codes,
         }
 
-        cache.set(cache_key, data, timeout=180)  # Cache for 3 minutes
+        # cache.set(cache_key, data, timeout=180)  # Cache for 3 minutes
         return JsonResponse({"message": "Latest telemetry", "record": data})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=404)

@@ -16,7 +16,7 @@ def create_vehicle(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-
+# vin = request.POST.gte('vin')
             vin = data.get("vin")
             vManufacturer = data.get("vManufacturer")
             vModel = data.get("vModel")
@@ -79,11 +79,7 @@ def list_vehicle(request, id):
 # Endpoint to list all vehicles record
 # @ratelimit(key="ip", rate="20/m", block=True)
 def list_vehicles(request):
-    cached = cache.get("all_vehicles")
-    if cached:
-        return JsonResponse({"message": "Cached", "vehicles": cached})
     vehicles = list(Vehicle.objects.values())
-    cache.set("all_vehicles", vehicles, timeout=300)
     return JsonResponse({"message": "Live", "vehicles": vehicles})
 
 
