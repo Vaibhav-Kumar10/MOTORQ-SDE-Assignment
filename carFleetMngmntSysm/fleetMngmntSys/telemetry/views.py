@@ -62,7 +62,6 @@ def receive_telemetry_data(request):
                 Alert.objects.values("alert_type").annotate(count=Count("id"))
             )
             cache.set("alerts_summary", alerts_summary, timeout=300)
-
         process_alerts.delay(vehicle.id, speed, fuel_level)
 
         return JsonResponse({"message": "Telemetry data saved"})
