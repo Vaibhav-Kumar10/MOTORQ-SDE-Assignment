@@ -22,4 +22,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("vehicleFleet/", include("vehicleFleet.urls", namespace="vehicleFleet")),
     path("telemtry/", include("telemetry.urls", namespace="telemetry")),
+    path("fleetAnalytics/", include("fleetAnalytics.urls", namespace="fleetAnalytics")),
 ]
